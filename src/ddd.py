@@ -24,6 +24,26 @@ class Tag:
     Person: str
     Bemerkung: str
 
+    @property
+    def gesamtbewertung(self):
+        kandidaten = [self.K1, self.K2, self.K3, self.K4, self.K5]
+
+        return self._wertung(kandidaten)
+
+    @property
+    def bolwertung(self):
+        bols = [self.Mikkel, self.Andi, self.Chat]
+
+        return self._wertung(bols)
+
+    def _wertung(self, cols: list) -> int:
+        cols = list(filter(None, cols))
+
+        punkte = (sum(cols) / len(cols)) * 4
+        punkte = round(punkte)
+
+        return punkte
+
     @classmethod
     def from_dataframe(cls, row) -> "Tag":
         data = row.to_dict()
