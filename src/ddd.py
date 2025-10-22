@@ -47,6 +47,13 @@ class Tag:
 
         return punkte
 
+    @property
+    def wertung_distance(self) -> int:
+        if self.gesamtbewertung is None or self.bolwertung is None:
+            return 0
+
+        return abs(self.gesamtbewertung - self.bolwertung)
+
     def __bool__(self) -> bool:
         cols = [
             self.Mikkel,
