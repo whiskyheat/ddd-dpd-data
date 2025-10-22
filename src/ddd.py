@@ -44,6 +44,20 @@ class Tag:
 
         return punkte
 
+    def __bool__(self) -> bool:
+        cols = [
+            self.Mikkel,
+            self.Andi,
+            self.Chat,
+            self.K1,
+            self.K2,
+            self.K3,
+            self.K4,
+            self.K5,
+        ]
+
+        return not all(col is None for col in cols)
+
     @classmethod
     def from_dataframe(cls, row) -> "Tag":
         data = row.to_dict()

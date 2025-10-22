@@ -9,5 +9,6 @@ def load_data(as_df: bool = False):
     # convert to objects
     if not as_df:
         data = [Tag.from_dataframe(row) for _, row in data.iterrows()]
+        data = [tag for tag in data if tag]
 
     return data
