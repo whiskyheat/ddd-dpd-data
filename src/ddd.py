@@ -36,8 +36,11 @@ class Tag:
 
         return self._wertung(bols)
 
-    def _wertung(self, cols: list) -> int:
+    def _wertung(self, cols: list) -> int | None:
         cols = list(filter(None, cols))
+
+        if len(cols) == 0:
+            return None
 
         punkte = (sum(cols) / len(cols)) * 4
         punkte = round(punkte)
