@@ -23,6 +23,7 @@ class Tag:
 
     Person: str
     Bemerkung: str
+    YTLink: str
 
     @property
     def gesamtbewertung(self):
@@ -76,6 +77,8 @@ class Tag:
         data["Mikkel"] = data.pop("M")
         data["Andi"] = data.pop("A")
         data["Chat"] = data.pop("C")
+
+        data["YTLink"] = data.pop("YT-Link")
 
         # floats to int
         for k, v in data.items():
