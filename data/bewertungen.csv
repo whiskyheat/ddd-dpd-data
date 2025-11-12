@@ -38,3 +38,8 @@ WochenID,FolgenID,Datum,Ort,K1,K2,K3,K4,K5,Summe,M,A,C,Person,Bemerkung,YT-Link
 8,1978,04.12.2013,Berlin,7,7,,8,8,30,7,8,8,Claudia,U30,https://www.youtube.com/watch?v=SN1KuiYpFik
 8,1979,05.12.2013,Berlin,8,6,9,,9,32,4,3,3,Lukas,"U30, 8h-Dinner",https://www.youtube.com/watch?v=SN1KuiYpFik
 8,1980,06.12.2013,Berlin,7,5,8,6,,26,8,8,7,Cissy,U30,https://www.youtube.com/watch?v=SN1KuiYpFik
+9,1379,25.07.2011,Paris,,6,6,6,7,25,6,6,6,Lea,Paris
+9,1380,26.07.2011,Paris,7,,7,8,9,31,6,6,6,Oliver,Paris
+9,1381,27.07.2011,Paris,6,7,,7,8,28,6,6,7,Raimund,Paris
+9,1382,28.07.2011,Paris,8,7,8,,9,32,9,10,9,Jakob,Paris
+9,1383,29.07.2011,Paris,6,6,7,7,,26,7,6,6,Tanja,Paris
