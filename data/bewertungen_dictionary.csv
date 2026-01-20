@@ -13,6 +13,7 @@ Summe,int,Summe der Wertungen von K1 bis K5,0-40
 M,int,Wertung von Mikkel,0-10,Keine Wertung
 A,int,Wertung von Andi,0-10,Keine Wertung
 C,int,Durchschnittliche Wertung des Chats,0-10,Keine Wertung
+Bolwertung,int,"Summe der Wertungen von M, A und C. Skaliert um fehlende Werte auszugleichen.",0-30,,
 Person,string,Name des Kandidaten,,unbekannt
 Geschlecht,string,Geschlecht des Kandidaten,"m, w, d",
 Alter,int,Alter des Kandidaten,18-99,unbekannt
