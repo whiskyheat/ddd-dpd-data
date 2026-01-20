@@ -1,0 +1,20 @@
+column_name,dtype,description,allowed_values,missing_meaning,
+WochenID,int,
+FolgenID,int,Folgennummer laut fernsehserien.de,,unbekannt
+Ausstrahlung,date,Datum der Ausstraglung laut fernsehserien.de,,unbekannt
+Reaction,date,Datum der Reaction,,unbekannt
+Ort,string,Schauplatz der Folge,,unbekannt
+K1,int,Wertung des/der ersten Kandidaten/in,0-10,Kandidat kocht
+K2,int,Wertung des/der zweiten Kandidaten/in,0-10,Kandidat kocht
+K3,int,Wertung des/der dritten Kandidaten/in,0-10,Kandidat kocht
+K4,int,Wertung des/der vierten Kandidaten/in,0-10,Kandidat kocht
+K5,int,Wertung des/der fünften Kandidaten/in,0-10,Kandidat kocht oder 4er Woche
+Summe,int,Summe der Wertungen von K1 bis K5,0-40
+M,int,Wertung von Mikkel,0-10,Keine Wertung
+A,int,Wertung von Andi,0-10,Keine Wertung
+C,int,Durchschnittliche Wertung des Chats,0-10,Keine Wertung
+Person,string,Name des Kandidaten,,unbekannt
+Geschlecht,string,Geschlecht des Kandidaten,"m, w, d",
+Alter,int,Alter des Kandidaten,18-99,unbekannt
+Schlafrock?,bool,"1 wenn Schlafdrock-Folge, 0 sonst"
+YT-Link,string,Link zur Folge auf YouTube
