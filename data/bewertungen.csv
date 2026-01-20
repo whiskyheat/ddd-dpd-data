@@ -53,11 +53,11 @@ WochenID,FolgenID, Ausstrahlung,Reaction,Ort,K1,K2,K3,K4,K5,Summe,M,A,C,Person,
 11,985,13.01.2010,25.11.25,Krefeld,6,6,,5,6,23,5,6,6,Sabrina,w,,0,https://www.youtube.com/watch?v=icC6uYMoZ8E
 11,986,14.01.2010,26.11.25,Krefeld,10,8,8,,9,35,9,9,8,Willi,m,,0,https://www.youtube.com/watch?v=icC6uYMoZ8E
 11,987,15.01.2010,26.11.25,Krefeld,7,6,6,5,,24,3,3,4,Adriane,w,,0,https://www.youtube.com/watch?v=icC6uYMoZ8E
-12,1453,07.11.2011,02.12.25,Münster,,,,,,,,,,Palitha,m,,0,https://youtu.be/pRPLkWlRufU
-12,1454,08.11.2011,02.12.25,Münster,,,,,,,,,,Birgit,w,,0,https://youtu.be/1eJY-Y4OKkw
-12,1455,09.11.2011,02.12.25,Münster,,,,,,,,,,Heike,w,27,0,https://youtu.be/2Eoo8Ok3vYc
-12,1456,10.11.2011,03.12.25,Münster,,,,,,,,,,Andreas,m,42,0,https://youtu.be/kNcidz7M_Vs
-12,1457,11.11.2011,03.12.25,Münster,,,,,,,,,,Igbale,w,41,0,https://youtu.be/dXd8xvZgsk4
+12,1453,07.11.2011,02.12.25,Münster,,8,8,10,7,33,7,6,7,Palitha,m,,0,https://youtu.be/pRPLkWlRufU
+12,1454,08.11.2011,02.12.25,Münster,7,,8,7,9,31,7,8,7,Birgit,w,,0,https://youtu.be/1eJY-Y4OKkw
+12,1455,09.11.2011,02.12.25,Münster,5,5,,5,4,19,5,6,5,Heike,w,27,0,https://youtu.be/2Eoo8Ok3vYc
+12,1456,10.11.2011,03.12.25,Münster,6,6,10,,6,28,5,3,5,Andreas,m,42,0,https://youtu.be/kNcidz7M_Vs
+12,1457,11.11.2011,03.12.25,Münster,7,7,6,5,,25,8,8,8,Igbale,w,41,0,https://youtu.be/dXd8xvZgsk4
 13,1728,03.12.2012,14.01.26,,,,,,,,,,,Stefanie,w,39,0,https://youtu.be/NmkETvROM10
 13,1729,04.12.2012,14.01.26,,,,,,,,,,,Margret,w,57,0,https://youtu.be/v2yjM9dDfbw
 13,1730,05.12.2012,15.01.26,,,,,,,,,,,Harald,m,62,0,https://youtu.be/lKMF4AQv4mQ
