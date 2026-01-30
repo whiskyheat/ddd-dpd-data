@@ -2,8 +2,8 @@
 Detect cluster of ratings.
 """
 
-import json
 import argparse
+import json
 
 
 def cluster(ratings):
@@ -42,6 +42,8 @@ def split(text: str, seps: list[str] = ["-", "/", " bis "]) -> list[str]:
     for sep in seps:
         if sep in text:
             return text.split(sep)
+
+    raise ValueError("cannot split text")
 
 
 def cluster_average(cluster):
