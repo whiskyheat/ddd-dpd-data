@@ -1,23 +1,11 @@
 # Das Dilettantische Duett - Das Perfekte Dinner
 
-## Verlorene Folgen/Wochen
-Die ersten Reacts scheinen leider verloren zu sein.
-- Stefan aus Gummersbach
-- Jürgen
+[Das Dilettantische Duett](https://www.twitch.tv/dasdilettantischeduett) reagiert in seinen Streams regelmäßig auf Folgen von "Das Perfekte Dinner".
+Dieser Datensatz gibt eine Übersicht über gesehenen Folgen sowie dabei vergebenen Bewertungen - von der Show selbst, den Streamern und dem Chat.
+
+Der Datensatz befindet sich in der Datei `data/bewertungen.csv`, eine Erklärung in der Datei `data/bewertungen_dictionary.csv`.
+
+Die Bewertungen der Kandidaten und der Streamer werden direkt dem Stream entnommen. Der Chatverlauf kann mit Hilfe von [twitch-dl](https://github.com/ihabunek/twitch-dl) heruntergeladen werden und mit den Skripten in `scripts/` ausgewertet werden.
 
 
-## Zukünftige Ideen
-- Statistisch auswerten
-- Bewertungen der verlorenen Folgen aus den YT-Videos übernehmen
 
-
-## Bewertung des Chats
-Die Datei `data/bewertungen.csv`enthält unter anderem die durchschnittliche Wertung des Chats.
-Diese wurde wie folgt bestimmt:
-1. Mittels [twitch-dl](https://github.com/ihabunek/twitch-dl) lassen sich die Chatverläufe der verfügbaren Streams herunterladen.
-2. Das Skript `scripts/extract_ratings_from_chat.py` filtert nur die relevanten Messages raus, im Format `time: message`.
-3. Das Skript `scripts/cluster_chat_ratings.py` clustert die Messages nach ihrem Zeitstempel, und gibt für jeden Cluster die durchschnittliche Bewertung aus
-
-
-## Sonstiges
-https://github.com/ihabunek/twitch-dl hat eine Funktion zum herunterladen von chats, wenn das video noch verfügbar ist.
