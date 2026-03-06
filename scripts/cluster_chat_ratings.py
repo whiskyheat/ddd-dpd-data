@@ -1,6 +1,4 @@
 """
-cluster_ratings.py
-
 Gruppiert Ratings (Output von extract_ratings.py) in Cluster
 anhand von Zeitlücken und speichert jeden Cluster als eigene JSON-Datei.
 
@@ -23,9 +21,10 @@ def cluster(ratings: dict, gap: int = 60) -> list[dict]:
     sorted_items = sorted(ratings.items(), key=lambda x: int(x[0]))
     clusters = []
     current = {}
+    last = None
 
     for time, text in sorted_items:
-        if current and int(time) - int(last) > gap:
+        if last is not None and int(time) - int(last) > gap:
             clusters.append(current)
             current = {}
         current[time] = text
