@@ -18,35 +18,34 @@ und als JSON-Cache gespeichert. Folgeaufrufe sind sofort schnell.
 ═══════════════════════════════════════════════════════════
 """
 
-# Created using Claude Sonnet 4.6
-
-import sys
-import re
 import json
+import re
+import sys
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
 # Hauptseite zum Ermitteln der Staffel-URLs und Serien-ID
-BASE_URL    = "https://www.fernsehserien.de"
-GUIDE_URL   = BASE_URL + "/das-perfekte-dinner/episodenguide"
-CACHE_FILE    = Path("dinner_episoden.json")
-CACHE_VERSION = 3   # erhöhen wenn sich woche_key-Logik ändert
+BASE_URL = "https://www.fernsehserien.de"
+GUIDE_URL = BASE_URL + "/das-perfekte-dinner/episodenguide"
+CACHE_FILE = Path("cache/dinner_episoden.json")
+CACHE_VERSION = 3  # erhöhen wenn sich woche_key-Logik ändert
 
 HEADERS = {
-    "User-Agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                       "AppleWebKit/537.36 (KHTML, like Gecko) "
-                       "Chrome/120.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/120.0.0.0 Safari/537.36",
     "Accept-Language": "de-DE,de;q=0.9",
-    "Accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Referer":         GUIDE_URL,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Referer": GUIDE_URL,
 }
 
 # ──────────────────────────────────────────────────────────
 # HTTP
 # ──────────────────────────────────────────────────────────
+
 
 def get(url: str, retries: int = 3) -> str:
     for attempt in range(retries):
@@ -62,7 +61,7 @@ def get(url: str, retries: int = 3) -> str:
                 time.sleep(wait)
             else:
                 raise
-        except Exception as e:
+        except Exception:
             if attempt < retries - 1:
                 time.sleep(2)
             else:
@@ -73,6 +72,7 @@ def get(url: str, retries: int = 3) -> str:
 # ──────────────────────────────────────────────────────────
 # HTML-Parsing
 # ──────────────────────────────────────────────────────────
+
 
 def extract_ort(title: str) -> str:
     """
@@ -85,13 +85,13 @@ def extract_ort(title: str) -> str:
       "Wunschmenü: Tag 1: Melanie, Rhein-..."   → "Rhein-..."
     """
     # Ort nach Komma/Slash — aber nur wenn der Kandidat kein Tag-Titel ist
-    ort_m = re.search(r'[,/]\s*(.+)$', title)
+    ort_m = re.search(r"[,/]\s*(.+)$", title)
     if ort_m:
         kandidat = ort_m.group(1).strip()
-        if not re.match(r'(?i)tag\s*\d|woche|profi|menu|menü', kandidat):
-            return re.sub(r'^\((.+)\)$', r'\1', kandidat)
+        if not re.match(r"(?i)tag\s*\d|woche|profi|menu|menü", kandidat):
+            return re.sub(r"^\((.+)\)$", r"\1", kandidat)
     # Fallback: "aus ORT" am Titelende
-    ort_m = re.search(r'\baus\s+(\S.+)$', title, re.IGNORECASE)
+    ort_m = re.search(r"\baus\s+(\S.+)$", title, re.IGNORECASE)
     if ort_m:
         return ort_m.group(1).strip()
     return ""
@@ -115,8 +115,7 @@ def parse_episodes_from_html(html: str) -> list[dict]:
 
     # Jeden <section itemprop="episode">...</section> Block einzeln verarbeiten
     section_pattern = re.compile(
-        r'<section\s[^>]*itemprop="episode"[^>]*>([\s\S]*?)</section>',
-        re.DOTALL
+        r'<section\s[^>]*itemprop="episode"[^>]*>([\s\S]*?)</section>', re.DOTALL
     )
 
     for sec in section_pattern.finditer(html):
@@ -124,31 +123,34 @@ def parse_episodes_from_html(html: str) -> list[dict]:
 
         # URL-Pfad und Slug
         url_m = re.search(
-            r'href="(/das-perfekte-dinner/folgen/(\d+(?:[ab]?)-[^"]+))"',
-            block
+            r'href="(/das-perfekte-dinner/folgen/(\d+(?:[ab]?)-[^"]+))"', block
         )
         if not url_m:
             continue
         url_path = url_m.group(1)
-        slug     = url_m.group(2)
+        slug = url_m.group(2)
 
         # Folgennummer
-        folge_m  = re.match(r'^(\d+(?:[ab]?))', slug)
+        folge_m = re.match(r"^(\d+(?:[ab]?))", slug)
         folge_nr = folge_m.group(1) if folge_m else "?"
 
         # Titel aus <span itemprop="name">
-        title_m = re.search(r'<span\s[^>]*itemprop="name"[^>]*>([\s\S]*?)</span>', block)
+        title_m = re.search(
+            r'<span\s[^>]*itemprop="name"[^>]*>([\s\S]*?)</span>', block
+        )
         if not title_m:
             continue
-        title = re.sub(r'<[^>]+>', '', title_m.group(1)).strip()
+        title = re.sub(r"<[^>]+>", "", title_m.group(1)).strip()
         if not title:
             continue
 
         # Datum aus <ea-angabe-datum>Mo. 01.01.2007</ea-angabe-datum>
-        datum_m = re.search(r'<ea-angabe-datum>[^<]*?(\d{2}\.\d{2}\.\d{4})</ea-angabe-datum>', block)
+        datum_m = re.search(
+            r"<ea-angabe-datum>[^<]*?(\d{2}\.\d{2}\.\d{4})</ea-angabe-datum>", block
+        )
         if not datum_m:
             # Fallback: irgendein Datum im Block
-            datum_m = re.search(r'(\d{2}\.\d{2}\.\d{4})', block)
+            datum_m = re.search(r"(\d{2}\.\d{2}\.\d{4})", block)
         if not datum_m:
             continue
         datum = datum_m.group(1)
@@ -158,19 +160,21 @@ def parse_episodes_from_html(html: str) -> list[dict]:
             continue
         seen.add(key)
 
-        jahr  = datum.split('.')[-1]
-        ort   = extract_ort(title)
+        jahr = datum.split(".")[-1]
+        ort = extract_ort(title)
 
         # woche_key wird später in assign_week_keys() gesetzt
-        episodes.append({
-            "folge":     folge_nr,
-            "titel":     title,
-            "datum":     datum,
-            "url":       BASE_URL + url_path,
-            "jahr":      jahr,
-            "ort":       ort,
-            "woche_key": "",   # wird unten befüllt
-        })
+        episodes.append(
+            {
+                "folge": folge_nr,
+                "titel": title,
+                "datum": datum,
+                "url": BASE_URL + url_path,
+                "jahr": jahr,
+                "ort": ort,
+                "woche_key": "",  # wird unten befüllt
+            }
+        )
 
     return episodes
 
@@ -195,14 +199,14 @@ def assign_week_keys(episodes: list[dict]) -> None:
     sorted_eps = sorted(episodes, key=lambda e: to_days(e["datum"]))
 
     group_start = None
-    group_key   = None
+    group_key = None
 
     for ep in sorted_eps:
         d = to_days(ep["datum"])
         if group_start is None or d - group_start > 5:
             group_start = d
-            suffix      = f"_{ep['ort']}" if ep["ort"] else ""
-            group_key   = f"{ep['datum']}{suffix}"
+            suffix = f"_{ep['ort']}" if ep["ort"] else ""
+            group_key = f"{ep['datum']}{suffix}"
         ep["woche_key"] = group_key
 
 
@@ -216,9 +220,7 @@ def find_staffel_urls(html: str) -> list[str]:
     den Jahres-Ankern im Navigationsbereich zählen, URLs dann selbst bauen.
     """
     # Serien-ID aus einem der sichtbaren Staffel-Links holen
-    serien_id_m = re.search(
-        r'/episodenguide/\d+/(\d+)', html
-    )
+    serien_id_m = re.search(r"/episodenguide/\d+/(\d+)", html)
     if not serien_id_m:
         print("   WARNUNG: Serien-ID nicht gefunden, verwende Fallback 21260")
         serien_id = "21260"
@@ -227,15 +229,17 @@ def find_staffel_urls(html: str) -> list[str]:
 
     # Staffelanzahl: Jahres-Anker im Nav zählen → [2005](#0) [2006](#1) …
     # Jeder Anker entspricht einer Staffel (Index 0-basiert, Staffel 1-basiert)
-    jahr_anker = re.findall(r'\[\d{4}\]\(#\d+\)', html)
+    jahr_anker = re.findall(r"\[\d{4}\]\(#\d+\)", html)
     n_staffeln = len(jahr_anker)
     if n_staffeln == 0:
         # Fallback: höchste Staffelnummer aus sichtbaren Links
-        nummern = re.findall(r'/episodenguide/(\d+)/' + serien_id, html)
+        nummern = re.findall(r"/episodenguide/(\d+)/" + serien_id, html)
         n_staffeln = max(int(x) for x in nummern) if nummern else 22
 
-    base_path = re.search(r'(/[^/]+/episodenguide)/', html)
-    serie_path = base_path.group(1) if base_path else "/das-perfekte-dinner/episodenguide"
+    base_path = re.search(r"(/[^/]+/episodenguide)/", html)
+    serie_path = (
+        base_path.group(1) if base_path else "/das-perfekte-dinner/episodenguide"
+    )
 
     urls = [
         f"{BASE_URL}{serie_path}/{staffel}/{serien_id}"
@@ -247,6 +251,7 @@ def find_staffel_urls(html: str) -> list[str]:
 # ──────────────────────────────────────────────────────────
 # Vollständiges Laden aller Staffeln
 # ──────────────────────────────────────────────────────────
+
 
 def load_staffel(serie_path: str, serien_id: str, staffel_nr: int) -> list[dict]:
     """
@@ -297,18 +302,18 @@ def load_all_episodes(force_fresh: bool = False) -> list[dict]:
         cached = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
         # Cache-Format: entweder plain list (v1) oder {"version":N, "episodes":[...]}
         if isinstance(cached, dict):
-            version  = cached.get("version", 1)
-            data     = cached.get("episodes", [])
+            version = cached.get("version", 1)
+            data = cached.get("episodes", [])
         else:
-            version  = 1
-            data     = cached
+            version = 1
+            data = cached
         if version < CACHE_VERSION:
             print(f"   Cache veraltet (v{version} < v{CACHE_VERSION}), baue neu …")
         else:
             print(f"   Cache gefunden: {CACHE_FILE}")
             # ort + woche_key immer frisch berechnen (nicht aus Cache lesen)
             for ep in data:
-                ep["ort"]       = extract_ort(ep["titel"])
+                ep["ort"] = extract_ort(ep["titel"])
                 ep["woche_key"] = ""
             assign_week_keys(data)
             print(f"   {len(data)} Episoden aus Cache geladen.")
@@ -330,9 +335,9 @@ def load_all_episodes(force_fresh: bool = False) -> list[dict]:
         sys.exit(1)
 
     # Serien-ID und Pfad aus einer bekannten URL extrahieren
-    sample_m = re.search(r'(/[^/]+/episodenguide)/(\d+)/(\d+)', staffel_urls[0])
+    sample_m = re.search(r"(/[^/]+/episodenguide)/(\d+)/(\d+)", staffel_urls[0])
     serie_path = sample_m.group(1)
-    serien_id  = sample_m.group(3)
+    serien_id = sample_m.group(3)
     n_staffeln = len(staffel_urls)
     print(f"   {n_staffeln} Staffeln gefunden (Serien-ID: {serien_id}).")
 
@@ -359,7 +364,7 @@ def load_all_episodes(force_fresh: bool = False) -> list[dict]:
 
     # Sortiere nach Folgennummer
     def folge_sort_key(ep):
-        m = re.match(r'^(\d+)([ab]?)$', ep["folge"])
+        m = re.match(r"^(\d+)([ab]?)$", ep["folge"])
         return (int(m.group(1)), m.group(2)) if m else (0, "")
 
     episodes.sort(key=folge_sort_key)
@@ -368,10 +373,14 @@ def load_all_episodes(force_fresh: bool = False) -> list[dict]:
     assign_week_keys(episodes)
 
     # Cache speichern
+    CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
     CACHE_FILE.write_text(
-        json.dumps({"version": CACHE_VERSION, "episodes": episodes},
-                   ensure_ascii=False, indent=2),
-        encoding="utf-8"
+        json.dumps(
+            {"version": CACHE_VERSION, "episodes": episodes},
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
     )
     print(f"\n   Gesamt: {len(episodes)} Episoden. Cache gespeichert: {CACHE_FILE}")
     return episodes
@@ -380,6 +389,7 @@ def load_all_episodes(force_fresh: bool = False) -> list[dict]:
 # ──────────────────────────────────────────────────────────
 # Suche & Ausgabe
 # ──────────────────────────────────────────────────────────
+
 
 def search(names: list[str], episodes: list[dict]) -> list[str]:
     """
@@ -409,13 +419,13 @@ def group_by_week(episodes: list[dict]) -> dict:
 
 def extract_name_age(titel: str) -> tuple:
     """Gibt (Name, Alter) zurück. Alter ist '' wenn nicht angegeben."""
-    m = re.search(r'(?:\d+\.\s*Tag|\bTag\s*\d+)[^:]*:\s*(.+)$', titel, re.IGNORECASE)
+    m = re.search(r"(?:\d+\.\s*Tag|\bTag\s*\d+)[^:]*:\s*(.+)$", titel, re.IGNORECASE)
     raw = m.group(1).strip() if m else titel
-    alter_m = re.search(r'\((\d+)\)', raw)
+    alter_m = re.search(r"\((\d+)\)", raw)
     alter = alter_m.group(1) if alter_m else ""
-    name = re.sub(r'\s*\(\d+\)', '', raw)
-    name = re.sub(r'\s*[,/]\s*.+$', '', name)
-    name = re.sub(r'\s+aus\s+\S.*$', '', name, flags=re.IGNORECASE)
+    name = re.sub(r"\s*\(\d+\)", "", raw)
+    name = re.sub(r"\s*[,/]\s*.+$", "", name)
+    name = re.sub(r"\s+aus\s+\S.*$", "", name, flags=re.IGNORECASE)
     return name.strip(), alter
 
 
@@ -425,7 +435,7 @@ def extract_name(titel: str) -> str:
 
 def date_sort_key(ep: dict) -> tuple:
     d, mo, y = ep["datum"].split(".")
-    m = re.match(r'^(\d+)([ab]?)$', ep["folge"])
+    m = re.match(r"^(\d+)([ab]?)$", ep["folge"])
     folge_int = int(m.group(1)) if m else 0
     return (y, mo, d, folge_int)
 
@@ -433,16 +443,16 @@ def date_sort_key(ep: dict) -> tuple:
 def print_week(week_eps: list[dict], hit_folgen: set[str]):
     week_eps = sorted(week_eps, key=date_sort_key)
     # Ort aus der ersten Episode mit bekanntem Ort, sonst "unbekannt"
-    ort  = next((ep["ort"] for ep in week_eps if ep["ort"]), "unbekannt")
+    ort = next((ep["ort"] for ep in week_eps if ep["ort"]), "unbekannt")
     jahr = week_eps[0]["jahr"]
     datum_von = week_eps[0]["datum"]
     datum_bis = week_eps[-1]["datum"]
     print(f"  >> {ort}  ({datum_von} – {datum_bis})")
     print("  " + "─" * 54)
     for ep in week_eps:
-        marker      = "  [*]" if ep["folge"] in hit_folgen else "   - "
+        marker = "  [*]" if ep["folge"] in hit_folgen else "   - "
         name, alter = extract_name_age(ep["titel"])
-        alter_str   = f"({alter})" if alter else "     "
+        alter_str = f"({alter})" if alter else "     "
         print(f"{marker} Folge {ep['folge']:>5}  {ep['datum']}  {alter_str}  {name}")
     print()
 
@@ -451,10 +461,11 @@ def print_week(week_eps: list[dict], hit_folgen: set[str]):
 # main
 # ──────────────────────────────────────────────────────────
 
+
 def main():
-    args        = sys.argv[1:]
+    args = sys.argv[1:]
     force_fresh = "--fresh" in args
-    args        = [a for a in args if not a.startswith("--")]
+    args = [a for a in args if not a.startswith("--")]
 
     if not args:
         print(__doc__)
@@ -464,7 +475,7 @@ def main():
     if len(sys.argv[1:]) - (1 if force_fresh else 0) > 5:
         print("   Hinweis: Nur die ersten 5 Namen werden beruecksichtigt.\n")
 
-    print(f"\n  Das Perfekte Dinner – Namenssuche")
+    print("\n  Das Perfekte Dinner – Namenssuche")
     print(f"  Suchbegriffe: {', '.join(names)}\n")
 
     episodes = load_all_episodes(force_fresh=force_fresh)
@@ -476,10 +487,12 @@ def main():
     matching_keys = search(names, episodes)
 
     if not matching_keys:
-        print(f"\n  Keine Woche gefunden in der alle Namen vorkommen: {', '.join(names)}\n")
+        print(
+            f"\n  Keine Woche gefunden in der alle Namen vorkommen: {', '.join(names)}\n"
+        )
         sys.exit(0)
 
-    weeks      = group_by_week(episodes)
+    weeks = group_by_week(episodes)
     names_lower = [n.lower() for n in names]
 
     # hit_folgen: Episoden deren Titel einen der gesuchten Namen enthält
