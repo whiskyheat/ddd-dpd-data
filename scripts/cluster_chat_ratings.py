@@ -1,101 +1,78 @@
 """
-Detect cluster of ratings.
+cluster_ratings.py
+
+Gruppiert Ratings (Output von extract_ratings.py) in Cluster
+anhand von Zeitlücken und speichert jeden Cluster als eigene JSON-Datei.
+
+Usage:
+    python cluster_ratings.py ratings.json
+    cat ratings.json | python cluster_ratings.py
 """
 
 import argparse
 import json
+import sys
 
 
-def cluster(ratings):
+def cluster(ratings: dict, gap: int = 60) -> list[dict]:
     """
-    Split all ratings into clusters.
-
-    A cluster consists of all ratings where the pairwise difference in times is < 100.
+    Teilt ratings anhand von Zeitlücken in Cluster auf.
+    Eine neue Gruppe beginnt, wenn der Abstand zum vorherigen
+    Eintrag größer als `gap` Sekunden ist.
     """
-    # time of first rating
-    global_time = int(min(ratings))
-
+    sorted_items = sorted(ratings.items(), key=lambda x: int(x[0]))
     clusters = []
-    current_cluster = dict()
+    current = {}
 
-    for time, text in ratings.items():
-        time = int(time)
+    for time, text in sorted_items:
+        if current and int(time) - int(last) > gap:
+            clusters.append(current)
+            current = {}
+        current[time] = text
+        last = time
 
-        if time - global_time > 100:
-            clusters.append(current_cluster)
-            current_cluster = dict()
-
-        current_cluster[time] = text
-        global_time = time
-
-    clusters.append(current_cluster)
+    if current:
+        clusters.append(current)
 
     return clusters
 
 
-def split(text: str, seps: list[str] = ["-", "/", " bis "]) -> list[str]:
-    """
-    Split a text by multiple seperators.
-
-    Python's default split() only supports a single seperator.
-    """
-    for sep in seps:
-        if sep in text:
-            return text.split(sep)
-
-    raise ValueError("cannot split text")
-
-
-def cluster_average(cluster):
-    """
-    Calculate the average rating of a cluster.
-
-    If a rating is range, the first value is taken.
-    """
-    ratings = []
-    for rating in cluster.values():
-        if rating.isdecimal():
-            ratings.append(int(rating))
-        else:
-            rating = split(rating)
-            ratings.append(int(rating[0]))
-
-    return sum(ratings) / len(ratings)
-
-
-def describe(cluster):
-    """Describe the cluster."""
-
-    print(f"Cluster between {min(cluster)} and {max(cluster)}")
-    print(f"Cluster length {max(cluster) - min(cluster)}")
-    print(f"Number of ratings {len(cluster)}")
-    print(f"Values: {cluster.values()}")
-
-    avg = cluster_average(cluster)
-    print(f"Average: {avg}")
-    print(f"Rounded: {round(avg)}")
-
-    print()
-
-
-def is_valid_cluster(cluster):
-    """A cluster is valid if it has more than one entry."""
-    return len(cluster) > 1
-
-
 if __name__ == "__main__":
-    # Argument parser
     parser = argparse.ArgumentParser()
-    parser.add_argument("file")
-    # parser.add_argument("-o", "--outfile")
+    parser.add_argument("file", nargs="?", help="Input JSON (default: stdin)")
+    parser.add_argument(
+        "-o",
+        "--outprefix",
+        default=None,
+        help="Prefix für Ausgabedateien (default: stdout)",
+    )
+    parser.add_argument(
+        "--gap",
+        type=int,
+        default=60,
+        help="Mindestlücke in Sekunden zwischen Clustern (default: 60)",
+    )
+    parser.add_argument(
+        "--min-entries",
+        type=int,
+        default=2,
+        help="Minimale Anzahl Einträge pro Cluster (default: 1)",
+    )
     args = parser.parse_args()
 
-    # Open file
-    with open(args.file, mode="r") as file:
-        ratings = json.load(file)
+    if args.file:
+        with open(args.file) as f:
+            ratings = json.load(f)
+    else:
+        ratings = json.load(sys.stdin)
 
-    clusters = cluster(ratings)
+    clusters = [c for c in cluster(ratings, gap=args.gap) if len(c) >= args.min_entries]
 
-    for cluster in clusters:
-        # if is_valid_cluster(cluster):
-        describe(cluster)
+    for i, c in enumerate(clusters, start=1):
+        if args.outprefix:
+            outfile = f"{args.outprefix}_{i}.json"
+            with open(outfile, "w") as f:
+                json.dump(c, f, indent=4)
+            print(f"Cluster {i}: {len(c)} Einträge → {outfile}", file=sys.stderr)
+        else:
+            sys.stdout.write(json.dumps(c, indent=4) + "\n")
