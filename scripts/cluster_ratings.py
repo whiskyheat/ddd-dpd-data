@@ -9,7 +9,9 @@ Usage:
 
 import argparse
 import json
+import re
 import sys
+from statistics import median_high
 
 
 def cluster(ratings: dict, gap: int = 60) -> list[dict]:
@@ -34,6 +36,14 @@ def cluster(ratings: dict, gap: int = 60) -> list[dict]:
         clusters.append(current)
 
     return clusters
+
+
+def median_of_cluster(ratings):
+    values = []
+    for value in ratings.values():
+        values.append(int(re.split(r"[/\-]", value)[0]))
+
+    return median_high(values)
 
 
 if __name__ == "__main__":
@@ -75,3 +85,4 @@ if __name__ == "__main__":
             print(f"Cluster {i}: {len(c)} Einträge → {outfile}", file=sys.stderr)
         else:
             sys.stdout.write(json.dumps(c, indent=4) + "\n")
+            print(f"Cluster median: {median_of_cluster(c)}")
