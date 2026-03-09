@@ -54,8 +54,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--min-entries",
         type=int,
-        default=2,
-        help="Minimale Anzahl Einträge pro Cluster (default: 1)",
+        default=3,
+        help="Minimale Anzahl Einträge pro Cluster (default: 3)",
     )
     args = parser.parse_args()
 
