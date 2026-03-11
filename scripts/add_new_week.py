@@ -2,6 +2,7 @@ import argparse
 import csv
 import json
 import logging
+import pprint
 import subprocess
 import sys
 from datetime import datetime, timedelta
@@ -20,7 +21,7 @@ from scripts.parse_week import CSV_FIELDNAMES, get_next_wochen_id
 
 EXPECTED_EPISODES_PER_WEEK = 5
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(funcName)s: %(message)s")
 log = logging.getLogger(__name__)
 
 
@@ -72,11 +73,16 @@ def finde_woche(personen: list[str]):
     episodes = load_all_episodes()
     matching_keys = search(personen, episodes)
 
+    log.debug(pprint.pformat(matching_keys))
+
     if len(matching_keys) != 1:
         raise ValueError(f"Erwartete genau eine Woche, gefunden: {len(matching_keys)}")
 
     weeks = group_by_week(episodes)
-    return weeks.get(matching_keys[0])
+    week = weeks.get(matching_keys[0])
+    # log.debug(pprint.pformat(week))
+
+    return week
 
 
 def finde_streams(streams: list[str]):
@@ -88,6 +94,7 @@ def finde_streams(streams: list[str]):
     alle_streams = json.loads(alle_streams)["videos"]
 
     gefundene = [s for s in alle_streams if int(s["id"]) in streamids]
+    log.debug("%s Streams gefunden: %s", len(gefundene), [s["id"] for s in gefundene])
     if len(gefundene) != len(streamids):
         raise ValueError(f"Nicht alle Streams gefunden: {streamids}")
 
@@ -113,6 +120,8 @@ def download_chat(streamid: str, streamdate: str) -> Path:
                 file,
             ],
         )
+    else:
+        log.info("Stream %s vom %s im cache gefunden", streamid, streamdate)
 
     return file
 
@@ -127,13 +136,17 @@ def filter_and_cluster_chat(file: Path, streamdate: str):
     clusters = [
         c for c in cluster(ratings, gap=timedelta(seconds=60)) if is_valid_cluster(c, 3)
     ]
-    log.info(clusters)
+    log.debug("%s Cluster gefunden", len(clusters))
+    log.debug(pprint.pformat(clusters))
 
     for idx, cl in enumerate(clusters):
         file_filtered = Path(f"cache/chat_ratings_{streamdate}_{idx}.json")
         if not file_filtered.exists():
+            log.debug("Schreibe Datei %s", file_filtered)
             with open(file_filtered, mode="w") as out:
                 json.dump(cl, out, indent=4)
+        else:
+            log.debug("Datei %s existiert bereits", file_filtered)
 
 
 def write_csv(woche, rating_files: list[Path]) -> None:
@@ -160,7 +173,7 @@ def write_csv(woche, rating_files: list[Path]) -> None:
                 data = json.load(json_f)
                 row["C"] = median_of_cluster(data)
 
-            print(row)
+            log.debug(row)
 
             writer.writerow(row)
 
@@ -172,6 +185,7 @@ if __name__ == "__main__":
         logging.getLogger().setLevel(logging.DEBUG)
 
     if args.clear_cache:
+        log.info("Lösche Cache")
         clear_cache()
 
     log.info("Suche Woche")
@@ -188,17 +202,23 @@ if __name__ == "__main__":
     except ValueError as e:
         log.error(e)
         sys.exit(1)
-    log.info("Streams gefunden\n")
+    log.info("Streams gefunden")
 
     for stream in streams:
         streamid = stream["id"]
         streamdate = stream["createdAt"][:10]
-        log.info("%s %s", streamid, streamdate)
 
+        log.info("Downloade Chat für Stream %s vom %s", streamid, streamdate)
         file = download_chat(streamid, streamdate)
+        log.info("Filtere und Clustere den Chat %s vom %s", streamid, streamdate)
         filter_and_cluster_chat(file, streamdate)
 
     rating_files = sorted(Path("cache").glob("chat_ratings_*.json"))
+    log.debug(
+        "%s Ratings befinden sich in den Datei %s",
+        len(rating_files),
+        pprint.pformat(rating_files),
+    )
     if len(rating_files) != EXPECTED_EPISODES_PER_WEEK:
         log.warning(
             "Es wurden Ratings zu %d Folgen gefunden, erwartet wurden %d.",
@@ -206,6 +226,7 @@ if __name__ == "__main__":
             EXPECTED_EPISODES_PER_WEEK,
         )
 
+    log.info("Schreibe in die CSV-Datei")
     write_csv(woche, rating_files)
 
 
