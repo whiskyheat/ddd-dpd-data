@@ -11,26 +11,29 @@ import argparse
 import json
 import re
 import sys
+from datetime import datetime, timedelta
 from statistics import median_high
 
 
-def cluster(ratings: dict, gap: int = 60) -> list[dict]:
+def cluster(ratings: dict, gap: timedelta = timedelta(seconds=60)) -> list[dict]:
     """
     Teilt ratings anhand von Zeitlücken in Cluster auf.
     Eine neue Gruppe beginnt, wenn der Abstand zum vorherigen
     Eintrag größer als `gap` Sekunden ist.
     """
-    sorted_items = sorted(ratings.items(), key=lambda x: int(x[0]))
+    sorted_items = sorted(ratings.items(), key=lambda x: x[0])
     clusters = []
     current = {}
     last = None
 
     for time, text in sorted_items:
-        if last is not None and int(time) - int(last) > gap:
+        dt = datetime.fromisoformat(time.replace("Z", "+00:00"))
+
+        if last is not None and dt - last > gap:
             clusters.append(current)
             current = {}
         current[time] = text
-        last = time
+        last = dt
 
     if current:
         clusters.append(current)
@@ -88,7 +91,11 @@ if __name__ == "__main__":
     else:
         ratings = json.load(sys.stdin)
 
-    clusters = [c for c in cluster(ratings, gap=args.gap) if len(c) >= args.min_entries]
+    clusters = [
+        c
+        for c in cluster(ratings, gap=timedelta(seconds=args.gap))
+        if len(c) >= args.min_entries
+    ]
 
     for i, c in enumerate(clusters, start=1):
         if args.outprefix:

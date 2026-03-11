@@ -4,7 +4,7 @@ import json
 import logging
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -124,7 +124,7 @@ def filter_and_cluster_chat(file: Path, streamdate: str):
     comments = extract_comments(raw_chat)
     ratings = {time: text for time, text in comments.items() if is_rating(text)}
 
-    clusters = [c for c in cluster(ratings, gap=60) if len(c) >= 3]
+    clusters = [c for c in cluster(ratings, gap=timedelta(seconds=60)) if len(c) >= 3]
     log.info(clusters)
 
     for idx, cl in enumerate(clusters):

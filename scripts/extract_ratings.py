@@ -16,7 +16,7 @@ def extract_comments(raw_chat: dict) -> dict[int, str]:
     comments = raw_chat["comments"]
 
     for comment in comments:
-        time = comment["contentOffsetSeconds"]
+        time = comment["createdAt"]
         try:
             text = comment["message"]["fragments"][0]["text"]
         except (IndexError, KeyError):
