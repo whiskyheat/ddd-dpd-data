@@ -153,6 +153,14 @@ def write_csv(woche, rating_files: list[Path]) -> None:
     bewertungen_file = Path("data/bewertungen.csv")
 
     wochen_id = get_next_wochen_id(bewertungen_file)
+
+    # Ensure file ends with newline before appending
+    if bewertungen_file.exists() and bewertungen_file.stat().st_size > 0:
+        with open(bewertungen_file, "rb+") as f:
+            f.seek(-1, 2)
+            if f.read(1) != b"\n":
+                f.write(b"\n")
+
     with open(bewertungen_file, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
 
@@ -228,6 +236,8 @@ if __name__ == "__main__":
 
     log.info("Schreibe in die CSV-Datei")
     write_csv(woche, rating_files)
+
+    log.info("Fertig!")
 
 
 # TODO move files to chats/
