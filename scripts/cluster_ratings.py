@@ -41,6 +41,17 @@ def cluster(ratings: dict, gap: timedelta = timedelta(seconds=60)) -> list[dict]
     return clusters
 
 
+def is_valid_cluster(cluster, min_entries: int) -> bool:
+    """
+    Entscheidet ob ein Cluster valide ist.
+    Ein valider Cluster muss mindestens `min_entries` haben und darf nicht nur aus "0" oder "1" bestehen.
+    Ein Cluster der nur aus "0" oder "1" besteht wird als Abstimmung einer ja/nein-Frage interpretiert und ignoriert.
+    """
+    return len(cluster) > min_entries and not all(
+        v in ("0", "1") for v in cluster.values()
+    )
+
+
 def median_of_cluster(ratings) -> int:
     """
     Berechnet den median_high der Bewertungen eines Clusters.
@@ -94,7 +105,7 @@ if __name__ == "__main__":
     clusters = [
         c
         for c in cluster(ratings, gap=timedelta(seconds=args.gap))
-        if len(c) >= args.min_entries
+        if is_valid_cluster(c, args.min_entries)
     ]
 
     for i, c in enumerate(clusters, start=1):
