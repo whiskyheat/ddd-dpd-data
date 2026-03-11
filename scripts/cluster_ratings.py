@@ -38,10 +38,23 @@ def cluster(ratings: dict, gap: int = 60) -> list[dict]:
     return clusters
 
 
-def median_of_cluster(ratings):
+def median_of_cluster(ratings) -> int:
+    """
+    Berechnet den median_high der Bewertungen eines Clusters.
+    Bei gerader Anzahl wird der höhere der beiden mittleren Werte gewählt.
+    """
     values = []
     for value in ratings.values():
-        values.append(int(re.split(r"[/\-]", value)[0]))
+        match = re.split(r"[/\-]", value)
+        if not match:
+            continue
+        try:
+            values.append(int(match[0]))
+        except ValueError:
+            continue
+
+    if not values:
+        raise ValueError("Keine gültigen Bewertungen im Cluster")
 
     return median_high(values)
 
