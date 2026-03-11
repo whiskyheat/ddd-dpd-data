@@ -18,6 +18,7 @@ und als JSON-Cache gespeichert. Folgeaufrufe sind sofort schnell.
 ═══════════════════════════════════════════════════════════
 """
 
+import argparse
 import json
 import re
 import sys
@@ -463,22 +464,32 @@ def print_week(week_eps: list[dict], hit_folgen: set[str]):
 
 
 def main():
-    args = sys.argv[1:]
-    force_fresh = "--fresh" in args
-    args = [a for a in args if not a.startswith("--")]
+    parser = argparse.ArgumentParser(
+        description="Das Perfekte Dinner – Namenssuche",
+        epilog="Beim ersten Aufruf werden alle Staffelseiten geladen (~22 Requests) "
+        "und als JSON-Cache gespeichert. Folgeaufrufe sind sofort schnell.",
+    )
+    parser.add_argument(
+        "namen",
+        nargs="+",
+        metavar="NAME",
+        help="Ein oder mehrere Namen (max. 5)",
+    )
+    parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="Cache löschen und Seite neu laden",
+    )
+    args = parser.parse_args()
 
-    if not args:
-        print(__doc__)
-        sys.exit(0)
-
-    names = args[:5]
-    if len(sys.argv[1:]) - (1 if force_fresh else 0) > 5:
+    names = args.namen[:5]
+    if len(args.namen) > 5:
         print("   Hinweis: Nur die ersten 5 Namen werden beruecksichtigt.\n")
 
     print("\n  Das Perfekte Dinner – Namenssuche")
     print(f"  Suchbegriffe: {', '.join(names)}\n")
 
-    episodes = load_all_episodes(force_fresh=force_fresh)
+    episodes = load_all_episodes(force_fresh=args.fresh)
 
     if not episodes:
         print("   Keine Episoden geladen.")
