@@ -1,17 +1,9 @@
 [project]
 name = "ddd-dpd"
 version = "0.1.0"
-description = "Stastics for 'Das Dilettantische Duett - Das Perfekte Dinner'"
+description = "Dataset for 'Das Dilettantische Duett - Das Perfekte Dinner'"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "jupyterlab>=4.4.9",
-    "matplotlib>=3.10.6",
-    "numpy>=2.3.3",
-    "pandas>=2.3.3",
-    "scikit-learn>=1.7.2",
-    "scipy>=1.16.2",
-]
 
 [dependency-groups]
 dev = [
